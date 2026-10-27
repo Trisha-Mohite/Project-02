@@ -12,7 +12,7 @@ Each Silhouette is visual record that can be compared by shape. There could be m
 
 This view layers many silhouettes on top of one another and places the collection’s average shape in the center. A tight cluster of outlines may suggest that many silhouettes have similar shapes; a wide spread may suggest more variation. The sketch explores the overall range of shapes in the collection.
 
-https://github.com/Trisha-Mohite/Project-02/blob/main/Sketches/idea-1.jpeg
+![My sketch](Sketches/idea-1.jpeg)
 
 
 
