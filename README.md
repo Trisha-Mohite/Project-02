@@ -20,6 +20,8 @@ https://github.com/Trisha-Mohite/Project-02/blob/main/Sketches/idea-1.jpeg
 
 This view uses a colored square to represent each pair of silhouettes. Silhouettes are arranged by their machine-learning groups, so patterns of similar or different shapes may appear as blocks. A color key explains what the colors mean. This view can help show whether silhouettes in the same group are also similar to one another.
 
+Sketches/idea-2.jpeg
+
 
 
 #Sketch 3: Typical to unsual
