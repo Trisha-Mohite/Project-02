@@ -20,10 +20,12 @@ This view layers many silhouettes on top of one another and places the collectio
 
 This view uses a colored square to represent each pair of silhouettes. Silhouettes are arranged by their machine-learning groups, so patterns of similar or different shapes may appear as blocks. A color key explains what the colors mean. This view can help show whether silhouettes in the same group are also similar to one another.
 
-Sketches/idea-2.jpeg
+![My sketch](Sketches/idea-2.jpeg)
 
 
 
 #Sketch 3: Typical to unsual
 
 This view arranges real silhouettes from closest to farthest from their group’s average shape. It shows which examples are most similar to the average and which differ most according to the dot-position measurements. “Unusual” means far from the average shape; it does not mean historically unusual.
+
+![My sketch](Sketches/idea-3.jpeg)
