@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silhouette Similarity by Cluster</title>
+<style>
+  body { margin: 0; background: #e8d5c4; color: #3d2b1f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+  svg { display: block; width: 100%; height: auto; border: 1px solid #c9b8a3; background: #e8d5c4; }
+  svg text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+  h1 { font-size: 1.75rem; font-weight: 600; margin: 0 0 0.5rem; color: #2d1b0e; }
+  .subtitle { color: #5c4a3a; font-size: 1rem; margin-bottom: 1.5rem; line-height: 1.5; }
+  .error { color: #c45a3a; background: #fdf0eb; padding: 1rem; border-radius: 8px; margin: 1rem 0; border: 1px solid #c45a3a; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Silhouette Similarity to Cluster Average</h1>
+  <p class="subtitle">Each cluster's silhouettes grouped by distance from the cluster's average shape. "Unusual" means far from the average shape; it does not mean historically unusual.</p>
+  <div id="errorMsg" class="error" style="display:none;"></div>
+  <svg id="chart" viewBox="0 0 1000 720" role="img" aria-label="Stacked bar chart with silhouette examples showing similarity distribution across 8 clusters"></svg>
+</main>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("chart");
+const errorDiv = document.getElementById("errorMsg");
+
+const RUST_COLORS = {
+  bg: "#e8d5c4",
+  text: "#2d1b0e",
+  textMuted: "#5c4a3a",
+  axis: "#8b7355",
+  grid: "#c9b8a3",
+  verySimilar: "#8fbc8f",
+  similar: "#a8c47a",
+  unusual: "#d4a54b",
+  veryUnusual: "#c45a3a",
+  catText: ["#3d5c3d", "#4a5c2d", "#5c4a1a", "#5c2d1a"],
+};
+
+const CATEGORIES = [
+  { label: "Very Similar", color: RUST_COLORS.verySimilar, textColor: RUST_COLORS.catText[0] },
+  { label: "Similar", color: RUST_COLORS.similar, textColor: RUST_COLORS.catText[1] },
+  { label: "Unusual", color: RUST_COLORS.unusual, textColor: RUST_COLORS.catText[2] },
+  { label: "Very Unusual", color: RUST_COLORS.veryUnusual, textColor: RUST_COLORS.catText[3] },
+];
+
+const CLUSTER_DATA = [
+  { name: "Cluster 1", counts: [75, 74, 74, 73], total: 296 },
+  { name: "Cluster 2", counts: [115, 115, 114, 114], total: 458 },
+  { name: "Cluster 3", counts: [74, 74, 73, 73], total: 294 },
+  { name: "Cluster 4", counts: [54, 53, 53, 53], total: 213 },
+  { name: "Cluster 5", counts: [74, 74, 74, 73], total: 295 },
+  { name: "Cluster 6", counts: [33, 33, 32, 32], total: 130 },
+  { name: "Cluster 7", counts: [29, 28, 28, 27], total: 112 },
+  { name: "Cluster 8", counts: [9, 9, 9, 8], total: 35 },
+];
+
+const REP_INDICES = [
+  [9, 25, 47, 22], [56, 66, 88, 82], [136, 100, 127, 133], [171, 187, 174, 173],
+  [216, 243, 247, 244], [276, 294, 269, 261], [302, 345, 324, 334], [353, 365, 350, 380],
+];
+
+let SILHOUETTE_SAMPLES = null;
+
+function el(name, attrs, parent) {
+  const node = document.createElementNS(NS, name);
+  for (const key in attrs) node.setAttribute(key, attrs[key]);
+  if (parent) parent.appendChild(node);
+  return node;
+}
+
+function showError(msg) {
+  errorDiv.textContent = msg;
+  errorDiv.style.display = "block";
+  console.error(msg);
+}
+
+async function loadData() {
+  try {
+    // Cache-busting timestamp
+    const resp = await fetch('silhouette_data.json?v=' + Date.now(), { cache: 'no-store' });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const data = await resp.json();
+    SILHOUETTE_SAMPLES = data.samples;
+    console.log('Loaded', SILHOUETTE_SAMPLES.length, 'silhouette samples');
+    if (SILHOUETTE_SAMPLES.length > 0) {
+      console.log('Sample 0:', SILHOUETTE_SAMPLES[0].length, 'points');
+      console.log('Sample 0 first:', SILHOUETTE_SAMPLES[0][0]);
+      console.log('Sample 0 last:', SILHOUETTE_SAMPLES[0][SILHOUETTE_SAMPLES[0].length-1]);
+    }
+    draw();
+  } catch (e) {
+    showError('Failed to load silhouette data: ' + e.message + '. Make sure you\'re running via Live Server (not file://).');
+    draw(); // Draw without silhouettes
+  }
+}
+
+function silhouetteToPath(points, scale, offsetX, offsetY) {
+  if (!points || points.length === 0) return "";
+  let d = `M${points[0][0] * scale + offsetX} ${points[0][1] * scale + offsetY}`;
+  for (let i = 1; i < points.length; i++) {
+    d += ` L${points[i][0] * scale + offsetX} ${points[i][1] * scale + offsetY}`;
+  }
+  return d + " Z";
+}
+
+function getSilhouetteBounds(points) {
+  if (!points || points.length === 0) return { minX: 0, maxX: 1, minY: 0, maxY: 1 };
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const p of points) {
+    if (p[0] < minX) minX = p[0];
+    if (p[0] > maxX) maxX = p[0];
+    if (p[1] < minY) minY = p[1];
+    if (p[1] > maxY) maxY = p[1];
+  }
+  return { minX, maxX, minY, maxY };
+}
+
+function draw() {
+  svg.innerHTML = "";
+
+  const W = 1000, H = 720;
+  const MARGIN = { top: 40, right: 40, bottom: 110, left: 80 };
+  const CHART_W = W - MARGIN.left - MARGIN.right;
+  const CHART_H = H - MARGIN.top - MARGIN.bottom;
+  const N_CLUSTERS = CLUSTER_DATA.length;
+  const BAR_W = CHART_W / (N_CLUSTERS * 1.35);
+  const GAP = BAR_W * 0.35;
+
+  const SILHOUETTE_H = 100;
+  const SILHOUETTE_GAP = 15;
+  const BAR_CHART_TOP = SILHOUETTE_H + SILHOUETTE_GAP;
+  const BAR_CHART_H = CHART_H - BAR_CHART_TOP;
+
+  // Main group (translated by margins)
+  const g = el("g", { transform: `translate(${MARGIN.left},${MARGIN.top})` }, svg);
+
+  // Y axis scale for bar chart
+  const maxTotal = Math.max(...CLUSTER_DATA.map(d => d.total));
+  const yMax = Math.ceil(maxTotal * 1.15 / 50) * 50;
+  const yScale = d => BAR_CHART_H * (1 - d / yMax);
+
+  // Y grid lines & labels
+  for (let y = 0; y <= yMax; y += 50) {
+    const yy = BAR_CHART_TOP + yScale(y);
+    el("line", { x1: 0, y1: yy, x2: CHART_W, y2: yy, stroke: RUST_COLORS.grid, "stroke-width": 1 }, g);
+    el("text", { x: -14, y: yy + 4, "font-size": 11, fill: RUST_COLORS.textMuted, "text-anchor": "end" }, g).textContent = y;
+  }
+  // Y axis line
+  el("line", { x1: 0, y1: BAR_CHART_TOP, x2: 0, y2: CHART_H, stroke: RUST_COLORS.axis, "stroke-width": 1.5 }, g);
+  // Y axis label
+  el("text", { x: -50, y: BAR_CHART_TOP + BAR_CHART_H / 2, "font-size": 12, fill: RUST_COLORS.textMuted, "text-anchor": "middle", transform: `rotate(-90,-50,${BAR_CHART_TOP + BAR_CHART_H / 2})` }, g).textContent = "Number of silhouettes";
+
+  // Draw silhouette examples for each cluster (above bars)
+  if (SILHOUETTE_SAMPLES) {
+    CLUSTER_DATA.forEach((cluster, ci) => {
+      const xBase = ci * (BAR_W + GAP) + GAP / 2;
+
+      // 4 silhouette positions per cluster, centered on each bar segment
+      const catCenters = [
+        xBase + BAR_W * 0.125,
+        xBase + BAR_W * 0.375,
+        xBase + BAR_W * 0.625,
+        xBase + BAR_W * 0.875,
+      ];
+
+      CATEGORIES.forEach((cat, catIdx) => {
+        const repIdx = REP_INDICES[ci][catIdx];
+        if (repIdx !== undefined && repIdx < SILHOUETTE_SAMPLES.length) {
+          const shape = SILHOUETTE_SAMPLES[repIdx];
+          const bounds = getSilhouetteBounds(shape);
+          const shapeW = bounds.maxX - bounds.minX;
+          const shapeH = bounds.maxY - bounds.minY;
+
+          // Scale to fit in bar segment width and silhouette area height
+          const maxW = BAR_W * 0.7;
+          const maxH = SILHOUETTE_H * 0.75;
+          const scale = Math.min(maxW / shapeW, maxH / shapeH);
+
+          // Center the silhouette
+          const cx = catCenters[catIdx];
+          const cy = SILHOUETTE_H / 2;
+          const offsetX = cx - (bounds.minX + shapeW / 2) * scale;
+          const offsetY = cy - (bounds.minY + shapeH / 2) * scale;
+
+          // Filled silhouette
+          el("path", {
+            d: silhouetteToPath(shape, scale, offsetX, offsetY),
+            fill: cat.color,
+            opacity: 0.95,
+          }, g);
+
+          // Outline
+          el("path", {
+            d: silhouetteToPath(shape, scale, offsetX, offsetY),
+            fill: "none",
+            stroke: cat.textColor,
+            "stroke-width": Math.max(0.5, 1 / scale),
+            opacity: 0.7,
+          }, g);
+        }
+      });
+
+      // Category labels below silhouettes - only show for first cluster
+      if (ci === 0) {
+        CATEGORIES.forEach((cat, catIdx) => {
+          const cx = catCenters[catIdx];
+          el("text", {
+            x: cx,
+            y: SILHOUETTE_H + 16,
+            "font-size": 9,
+            fill: cat.textColor,
+            "text-anchor": "middle",
+            "font-weight": "600",
+          }, g).textContent = cat.label;
+        });
+      }
+    });
+  } else {
+    // Placeholder text if no data
+    el("text", { x: CHART_W/2, y: SILHOUETTE_H/2, "font-size": 14, fill: RUST_COLORS.textMuted, "text-anchor": "middle" }, g).textContent = "Silhouette data not loaded (run via Live Server)";
+  }
+
+  // Draw stacked bars for each cluster
+  CLUSTER_DATA.forEach((cluster, ci) => {
+    const xBase = ci * (BAR_W + GAP) + GAP / 2;
+    let yOffset = 0;
+
+    cluster.counts.forEach((count, catIdx) => {
+      const barH = yScale(0) - yScale(count);
+      const cat = CATEGORIES[catIdx];
+
+      el("rect", {
+        x: xBase,
+        y: BAR_CHART_TOP + BAR_CHART_H - yOffset - barH,
+        width: BAR_W,
+        height: barH,
+        fill: cat.color,
+        rx: 2,
+        ry: 2,
+      }, g);
+
+      if (barH > 22) {
+        el("text", {
+          x: xBase + BAR_W / 2,
+          y: BAR_CHART_TOP + BAR_CHART_H - yOffset - barH / 2 + 4,
+          "font-size": 12,
+          fill: "#fff",
+          "text-anchor": "middle",
+          "font-weight": "600",
+          "text-shadow": "0 1px 2px rgba(0,0,0,0.3)",
+        }, g).textContent = count;
+      }
+
+      yOffset += barH;
+    });
+
+    // Cluster label below
+    el("text", {
+      x: xBase + BAR_W / 2,
+      y: CHART_H + 20,
+      "font-size": 13,
+      fill: RUST_COLORS.text,
+      "text-anchor": "middle",
+      "font-weight": "600",
+    }, g).textContent = cluster.name;
+
+    // Total count below label
+    el("text", {
+      x: xBase + BAR_W / 2,
+      y: CHART_H + 38,
+      "font-size": 11,
+      fill: RUST_COLORS.textMuted,
+      "text-anchor": "middle",
+    }, g).textContent = `n = ${cluster.total}`;
+  });
+
+  // X axis line
+  el("line", { x1: 0, y1: BAR_CHART_TOP + BAR_CHART_H, x2: CHART_W, y2: BAR_CHART_TOP + BAR_CHART_H, stroke: RUST_COLORS.axis, "stroke-width": 1.5 }, g);
+
+  // Legend
+  const legendY = CHART_H + 65;
+  const legendItemW = CHART_W / 4;
+  CATEGORIES.forEach((cat, i) => {
+    const lx = i * legendItemW + 15;
+    el("rect", { x: lx, y: legendY, width: 16, height: 16, fill: cat.color, rx: 3 }, g);
+    el("text", { x: lx + 22, y: legendY + 11, "font-size": 11, fill: RUST_COLORS.text, "font-weight": "500" }, g).textContent = cat.label;
+  });
+
+  // Decorative accent line at top
+  el("line", { x1: 0, y1: -MARGIN.top + 10, x2: CHART_W, y2: -MARGIN.top + 10, stroke: RUST_COLORS.veryUnusual, "stroke-width": 3, opacity: 0.3 }, g);
+}
+
+loadData();
+</script>
+</body>
+</html>
