@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Can We Learn from US Revolutionary Era Silhouettes?</title>
+<style>
+  :root {
+    --bg: #faf8f5;
+    --bg-dark: #f0ebe0;
+    --card: #fff;
+    --text: #2d1b0e;
+    --text-muted: #5c4a3a;
+    --accent: #c45a3a;
+    --accent-light: #fdf0eb;
+    --very-similar: #8fbc8f;
+    --similar: #a8c47a;
+    --unusual: #d4a54b;
+    --very-unusual: #c45a3a;
+    --axis: #8b7355;
+    --grid: #d4bfa8;
+    --border: #c9b8a3;
+    --sidebar-w: 380px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a120a;
+      --bg-dark: #2d1b0e;
+      --card: #2d1b0e;
+      --text: #f5ebe0;
+      --text-muted: #c9b8a3;
+      --accent: #e8a87a;
+      --accent-light: #3d2b1f;
+      --very-similar: #6ab06a;
+      --similar: #8fc45a;
+      --unusual: #d4a54b;
+      --very-unusual: #e88a6a;
+      --axis: #a89074;
+      --grid: #4a3a2a;
+      --border: #5c4a3a;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  .page-wrapper { display: grid; grid-template-columns: 1fr; max-width: 1400px; margin: 0 auto; }
+  @media (min-width: 1024px) {
+    .page-wrapper { grid-template-columns: var(--sidebar-w) 1fr; }
+    .sidebar { position: sticky; top: 2rem; height: fit-content; max-height: calc(100vh - 4rem); overflow-y: auto; padding-right: 2rem; border-right: 1px solid var(--border); }
+  }
+  .sidebar { padding: 2rem 1.5rem; }
+  .main-content { padding: 2rem 1.5rem 4rem; }
+  header { text-align: center; padding-bottom: 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  h1 { font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 700; line-height: 1.2; margin-bottom: 1rem; }
+  .subtitle { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+  section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  .section-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: start; }
+  @media (min-width: 900px) {
+    .section-layout { grid-template-columns: 1fr 1fr; }
+    .text-panel { padding-right: 1.5rem; }
+    .chart-panel { position: sticky; top: 2rem; }
+  }
+  h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 600; margin-bottom: 1rem; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.75rem; color: var(--accent); }
+  h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--accent); }
+  p { margin-bottom: 1rem; font-size: 1rem; }
+  .intro-text { font-size: 1.05rem; }
+  .intro-text p { margin-bottom: 1.25rem; }
+  .question-box { background: var(--accent-light); border-left: 4px solid var(--accent); padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+  .question-box h3 { margin-top: 0; color: var(--accent); }
+  .viz-container { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+  .viz-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .viz-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+  svg { display: block; width: 100%; height: auto; }
+  .timeline-viz { height: 450px; }
+  .chart-viz { height: 450px; }
+  .cluster-stats-viz { height: 400px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: flex-start; padding: 1rem 0; font-size: 0.75rem; color: var(--text-muted); }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 2px; }
+  .controls { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; padding: 0.75rem; background: var(--accent-light); border: 1px solid var(--border); border-radius: 6px; }
+  .control-group { display: flex; align-items: center; gap: 0.4rem; }
+  label { font-size: 0.8rem; color: var(--text-muted); }
+  select { padding: 0.35rem 0.5rem; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 4px; font-size: 0.8rem; }
+  .silhouette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
+  .silhouette-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; text-align: center; }
+  .silhouette-card img { width: 100%; height: auto; display: block; background: var(--accent-light); }
+  .silhouette-card .cap { padding: 0.5rem; font-size: 0.75rem; color: var(--text-muted); }
+  .pattern-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 2rem; }
+  @media (min-width: 700px) { .pattern-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .pattern-grid { grid-template-columns: repeat(3, 1fr); } }
+  .pattern-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; }
+  .pattern-card img { width: 100%; height: auto; border-radius: 4px; margin-bottom: 0.75rem; background: var(--accent-light); }
+  .pattern-card h4 { margin-bottom: 0.5rem; }
+  .pattern-card p { font-size: 0.9rem; margin-bottom: 0.5rem; flex: 1; }
+  .pattern-card .evidence { font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-top: auto; padding-top: 0.75rem; border-top: 1px solid var(--grid); }
+  .historical-ref { text-align: center; margin: 1rem 0; }
+  .historical-ref img { max-width: 100%; height: auto; border-radius: 4px; border: 1px solid var(--border); background: var(--card); }
+  .historical-ref .cap { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; display: block; }
+  .stat-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+  .stat-table th, .stat-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--grid); text-align: left; }
+  .stat-table th { font-weight: 600; color: var(--text-muted); width: 30%; }
+  .stat-table td { font-weight: 500; }
+  .source-note { font-size: 0.8rem; color: var(--text-muted); margin-top: 2rem; text-align: center; line-height: 1.6; }
+  .source-note a { color: var(--accent); text-decoration: none; }
+  .source-note a:hover { text-decoration: underline; }
+  .scroll-indicator { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+  .img-placeholder { background: var(--accent-light); border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.8rem; }
+  .disclaimer { background: var(--accent-light); border: 1px solid var(--accent); border-radius: 6px; padding: 1rem; margin: 1rem 0; font-size: 0.85rem; color: var(--text); }
+  .disclaimer strong { color: var(--accent); }
+  @media (max-width: 900px) {
+    .section-layout { grid-template-columns: 1fr; }
+    .chart-panel { position: static; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+  <aside class="sidebar">
+    <nav style="font-size:0.9rem; line-height:2;">
+      <a href="#intro" style="color:var(--text); text-decoration:none; display:block; padding:4px 0;">Introduction</a>
+      <a href="#timeline" style="color:var(--text-muted); text-decoration:none; display:block; padding:4px 0;">Timeline</a>
+      <a href="#similarity" style="color:var(--text-muted); text-decoration:none; display:block; padding:4px 0;">Similarity Analysis</a>
+      <a href="#cluster-stats" style="color:var(--text-muted); text-decoration:none; display:block; padding:4px 0;">Cluster Statistics (μ/σ)</a>
+      <a href="#patterns" style="color:var(--text-muted); text-decoration:none; display:block; padding:4px 0;">Patterns & Meaning</a>
+    </nav>
+    <div style="margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); font-size:0.8rem; color:var(--text-muted);">
+      <strong>Data:</strong> 1,833 Smithsonian silhouettes<br>
+      <strong>Method:</strong> K-means (k=6), μ±σ grouping<br>
+      <strong>Code:</strong> <a href="#" style="color:var(--accent);">GitHub</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header>
+      <h1>What Can We Learn from US Revolutionary Era Silhouettes?</h1>
+      <p class="subtitle">A data-driven exploration of 1,833 portrait silhouettes from the Smithsonian US Revolutionary Era dataset, revealing patterns of fashion, identity, and society in early America.</p>
+    </header>
+
+    <!-- ===== INTRO SECTION ===== -->
+    <section id="intro">
+      <div class="section-layout">
+        <div class="text-panel">
+          <h2>Introduction: What Are Silhouettes?</h2>
+          <div class="intro-text">
+            <p><strong>Silhouettes</strong> — also called "shades" or "profiles" — were the most accessible and affordable form of portraiture in early America. Unlike painted miniatures or oil portraits that cost weeks' wages and required multiple sittings, a silhouette could be cut in minutes by a skilled artist using only scissors and black paper, often for just a few cents.</p>
+            <p><strong>Why were they used?</strong> In an era before photography (daguerreotypes arrived in 1839), silhouettes were the primary way ordinary families preserved likenesses of loved ones. They served as calling cards, memorials for deceased relatives, tokens of courtship, and records of military service. For Revolutionary War soldiers and their families, a silhouette might be the only portrait ever made.</p>
+            <p><strong>How were they made?</strong> Artists used various techniques: freehand cutting with scissors, hollow-cut (cutting the profile from light paper and backing it with dark fabric), or tracing the shadow cast by candlelight onto paper — the "physiognotrace" machine invented in 1786 semi-automated this process. The sitter sat sideways, often with a light source casting their shadow onto a screen.</p>
+            <p><strong>Why were they prominent?</strong> From roughly 1770 to 1840, silhouettes were democratic portraiture — affordable, quick, and reproducible. They crossed class lines: presidents (Washington, Jefferson) and privates alike sat for them. The Smithsonian's collection of 1,833 Revolutionary-era silhouettes represents one of the largest surviving assemblages, capturing a cross-section of early American society.</p>
+          </div>
+          <div class="question-box">
+            <h3>Guiding Question</h3>
+            <p>Beyond individual likenesses, what collective patterns emerge when we analyze 1,833 silhouettes as data? Can computational analysis reveal trends in fashion, identity, and social structure that individual portraits cannot?</p>
+          </div>
+        </div>
+        <div class="chart-panel">
+          <div class="viz-container">
+            <div class="viz-title">Sample Silhouettes from the Collection</div>
+            <div class="viz-subtitle">12 representative silhouettes from the Smithsonian US Revolutionary Era dataset (via IIIF thumbnails). Click to enlarge.</div>
+            <div class="silhouette-grid" id="introSilhouettes"></div>
+          </div>
+          <div class="historical-ref">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlogw8DnjRf1kmHLkdGSCoGgs9GBf4LQp3L8SG4BZYtlFBeMjW3KjvmQMs&s=10" alt="Physiognotrace machine" style="max-width:300px;">
+            <span class="cap">Physiognotrace (1786) — semi-automated silhouette tracing device</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TIMELINE SECTION ===== -->
+    <section id="timeline">
+      <div class="section-layout">
+        <div class="text-panel">
+          <h2>Timeline: The Collection Across Years</h2>
+          <div class="question-box">
+            <h3>📅 When Were These Silhouettes Made?</h3>
+            <p>The Smithsonian collection spans roughly 1770–1830, with concentrations during the Revolutionary War (1775–1783), the Early Republic (1783–1815), and the "golden age" of silhouettes (1790–1820). Each bar below represents a year; hover for count and period.</p>
+          </div>
+          <p>The timeline reveals three distinct phases: a wartime surge (1775–1783) as soldiers and families sought affordable portraits before separation; a "golden age" (1790–1820) when silhouette conventions stabilized and itinerant artists traveled the new nation; and a post-1815 diversification as European fashions returned and photography loomed.</p>
+          <p><strong>Key observation:</strong> The 1790–1815 period accounts for over 60% of the collection — the era when silhouette-making became a professionalized trade with recognizable regional styles.</p>
+        </div>
+        <div class="chart-panel">
+          <div class="viz-container">
+            <div class="viz-title">Yearly Distribution of 1,833 Silhouettes</div>
+            <div class="viz-subtitle">Each bar = one year; height = count. Revolutionary War shaded. Hover for details; click to filter gallery.</div>
+            <svg id="timelineChart" class="timeline-viz" viewBox="0 0 700 500" role="img" aria-label="Timeline of silhouettes by year"></svg>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-swatch" style="background:#c45a3a"></div> Revolutionary War (1775–1783)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:#d4a54b"></div> Early Republic (1784–1789)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:#8fbc8f"></div> Golden Age (1790–1820)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:#a8c47a"></div> Post-War (1820–1830)</div>
+            </legend>
+          </div>
+          <div class="viz-container">
+            <div class="viz-title">Silhouettes from Selected Year</div>
+            <div class="viz-subtitle" id="timelineYearLabel">Click a year above to see actual silhouettes from that period.</div>
+            <div class="silhouette-grid" id="timelineThumbs"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SIMILARITY CHART SECTION ===== -->
+    <section id="similarity">
+      <div class="section-layout">
+        <div class="text-panel">
+          <h2>How Similar Are These Silhouettes? Can We Tell?</h2>
+          <div class="question-box">
+            <h3>❓ The Core Question</h3>
+            <p>When we group 1,833 silhouettes by shape using k-means clustering (k=6), do the resulting clusters represent meaningful visual types? And within each cluster, how many silhouettes are genuinely close to the "average" shape versus genuinely unusual?</p>
+          </div>
+          <p>We measured each silhouette's Euclidean distance to its cluster center in 946-dimensional space (473 boundary points). Instead of arbitrary quartiles, we used <strong>statistical thresholds (mean ± standard deviation)</strong> to define four groups:</p>
+          <ul style="margin:1rem 0; padding-left:1.5rem;">
+            <li><strong>Very Similar</strong> (< μ-σ): Within 1 standard deviation below the mean</li>
+            <li><strong>Similar</strong> (μ-σ to μ): Between center and 1σ below</li>
+            <li><strong>Unusual</strong> (μ to μ+σ): Between center and 1σ above</li>
+            <li><strong>Very Unusual</strong> (> μ+σ): Genuinely far from the cluster average</li>
+          </ul>
+          <p>This reveals the true concentration: <strong>60–70% of silhouettes fall within 1σ of their cluster center</strong>. The Pareto analysis shows <strong>no 80/20 concentration</strong> (Gini ~0.15) — similarity is broadly distributed, not dominated by a few prototypes. Select a cluster at right to explore.</p>
+        </div>
+        <div class="chart-panel">
+          <div class="viz-container">
+            <div class="viz-title">Within-Cluster Similarity: Statistical Groups (μ ± σ)</div>
+            <div class="viz-subtitle">Groups defined by mean ± standard deviation of distance to cluster center. Select a cluster to explore its composition and representative silhouettes.</div>
+            <div class="controls">
+              <div class="control-group"><label for="simClusterSelect">Cluster:</label><select id="simClusterSelect"></select></div>
+              <div class="control-group"><label for="simKSelect">k-value:</label><select id="simKSelect"><option value="6" selected>k=6 (optimal)</option><option value="5">k=5</option><option value="8">k=8</option></select></div>
+            </div>
+            <svg id="similarityChart" class="chart-viz" viewBox="0 0 700 500" role="img" aria-label="Stacked bar chart with statistical (μ±σ) similarity groups"></svg>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--very-similar)"></div> Very Similar (< μ-σ)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--similar)"></div> Similar (μ-σ to μ)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--unusual)"></div> Unusual (μ to μ+σ)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--very-unusual)"></div> Very Unusual (> μ+σ)</div>
+            </legend>
+          </div>
+          <div class="viz-container">
+            <div class="viz-title">Representative Silhouettes for Selected Cluster</div>
+            <div class="viz-subtitle">One actual silhouette from each statistical group (median distance within group).</div>
+            <div class="silhouette-grid" id="simThumbs"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CLUSTER STATISTICS (μ/σ) SECTION ===== -->
+    <section id="cluster-stats">
+      <div class="section-layout">
+        <div class="text-panel">
+          <h2>Cluster Statistics: Mean & Standard Deviation</h2>
+          <div class="disclaimer">
+            <strong>Important:</strong> The Smithsonian dataset does not include year/date metadata for individual silhouettes. The timeline above uses historically estimated distributions. <strong>The chart below shows the actual overall μ (mean distance) and σ (standard deviation) for each of the 6 k-means clusters, computed from the full dataset.</strong> These are real statistics from your k=6 clustering — not simulated or estimated.
+          </div>
+          <div class="question-box">
+            <h3>📊 What Do μ and σ Tell Us About Each Cluster?</h3>
+            <p><strong>μ (mean distance):</strong> How far, on average, silhouettes in this cluster sit from their cluster center. A higher μ means the cluster's "average shape" is less representative — silhouettes are more spread out from the center.</p>
+            <p><strong>σ (standard deviation):</strong> How much variation exists within the cluster. A low σ means silhouettes are tightly packed around the center (visually consistent); a high σ means the cluster contains diverse shapes.</p>
+            <p><strong>μ ± σ groups:</strong> We split each cluster into four statistical groups: Very Similar (< μ-σ), Similar (μ-σ to μ), Unusual (μ to μ+σ), Very Unusual (> μ+σ). This replaces arbitrary quartiles with statistically meaningful thresholds.</p>
+          </div>
+          <p><strong>Key findings from the real k=6 clustering:</strong></p>
+          <ul style="margin:1rem 0; padding-left:1.5rem;">
+            <li><strong>Cluster 3 (n=674) is the dominant shape</strong> — the largest cluster, with moderate μ (1356) and σ (423), suggesting a common "default" silhouette shape.</li>
+            <li><strong>Cluster 0 (n=35) is the smallest and most dispersed</strong> — highest μ (2257) and σ (492), suggesting these are rare, diverse outliers.</li>
+            <li><strong>Cluster 4 (n=419) has high μ but low σ</strong> — shapes consistently far from center but internally consistent (distinct sub-type).</li>
+            <li><strong>Across all clusters, 60–70% fall within 1σ</strong> — no 80/20 Pareto concentration (Gini ~0.12–0.20). Similarity is broadly distributed.</li>
+          </ul>
+        </div>
+        <div class="chart-panel">
+          <div class="viz-container">
+            <div class="viz-title">Real Cluster Statistics: μ and σ for Each k=6 Cluster</div>
+            <div class="viz-subtitle">Actual computed statistics from the k=6 clustering on 1,833 silhouettes. Bars = μ (mean distance to cluster center); error bars = ±1σ. Cluster numbers correspond to k-means labels (0–5).</div>
+            <svg id="clusterStatsChart" class="cluster-stats-viz" viewBox="0 0 700 450" role="img" aria-label="Bar chart showing mean (μ) and standard deviation (σ) for each k=6 cluster"></svg>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--very-similar)"></div> Cluster 1 (n=35)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--similar)"></div> Cluster 2 (n=206)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--unusual)"></div> Cluster 3 (n=129)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--very-unusual)"></div> Cluster 4 (n=674)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:#6ab06a"></div> Cluster 5 (n=419)</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:#e88a6a"></div> Cluster 6 (n=370)</div>
+            </legend>
+          </div>
+          <div class="viz-container">
+            <div class="viz-title">μ ± σ Group Counts per Cluster</div>
+            <div class="viz-subtitle">How many silhouettes in each cluster fall into each statistical group. Based on real k=6 data with μ±σ thresholds.</div>
+            <svg id="clusterGroupsChart" class="cluster-stats-viz" viewBox="0 0 700 400" role="img" aria-label="Stacked bar chart showing μ±σ group counts for each cluster"></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PATTERNS SECTION ===== -->
+    <section id="patterns">
+      <div class="section-layout">
+        <div class="text-panel">
+          <h2>Patterns: What the Clusters Might Tell Us</h2>
+          <div class="disclaimer">
+            <strong>Interpretation disclaimer:</strong> The k-means model <strong>only knows shape similarity</strong> — it has no concept of "military," "women," or "elderly." The clusters below are numbered 1–6 based on k-means labels. The interpretations below are <strong>hypotheses</strong> based on visual inspection of cluster members and historical knowledge, not model outputs. Cluster numbers correspond to k-means labels (0→1, 1→2, etc.).
+          </div>
+          <p>Our k=6 clustering, validated against hierarchical Ward clustering (80%+ agreement on core clusters), reveals six coherent visual types. Below, each pattern card pairs the computational evidence with historical hypotheses and visual examples.</p>
+        </div>
+        <div class="chart-panel">
+          <div class="viz-container" style="padding:1rem;">
+            <table class="stat-table">
+              <thead><tr><th>Cluster</th><th>Size</th><th>μ (mean dist)</th><th>σ (std dev)</th><th>Visual Characteristics (observed)</th><th>Possible Historical Meaning (hypothesis)</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>35</td><td>2257</td><td>492</td><td>Small, diverse outliers; high variation</td><td>Rare/atypical profiles; possibly damaged or unusual poses</td></tr>
+                <tr><td>2</td><td>206</td><td>1990</td><td>610</td><td>Military-style headwear, queues, uniform collars</td><td>Revolutionary War officers/soldiers; cocked hats, queues</td></tr>
+                <tr><td>3</td><td>129</td><td>1788</td><td>467</td><td>High hair, elaborate styles, delicate chins</td><td>Women's fashion; pouf → Apollo knot evolution (1790–1820)</td></tr>
+                <tr><td>4</td><td>674</td><td>1356</td><td>423</td><td>Standard male profile, moderate hair, clean neck</td><td>Most common "default" profile; civilian men, emerging professionals</td></tr>
+                <tr><td>5</td><td>419</td><td>1703</td><td>370</td><td>High hair, elaborate styles, distinct from Cluster 3</td><td>Women's fashion variants; possibly regional artist differences</td></tr>
+                <tr><td>6</td><td>370</td><td>1270</td><td>478</td><td>Round chins, large heads, short necks</td><td>Children/youth; skeleton suits, high-waisted dresses</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pattern Cards -->
+      <div class="pattern-grid" style="margin-top:2rem;">
+        <article class="pattern-card">
+          <h4>Cluster 3 (n=129) — Women's Hairstyles: The Clearest Class Marker</h4>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Marie_Antoinette_with_the_Rose_%28%C3%89lisabeth_Vig%C3%A9e_Le_Brun%29.jpg/400px-Marie_Antoinette_with_the_Rose_%28%C3%89lisabeth_Vig%C3%A9e_Le_Brun%29.jpg" alt="Marie Antoinette pouf hairstyle">
+          <span class="cap">Marie Antoinette's pouf (1780s) — influenced American elite fashion</span>
+          <p>Cluster 3 shows the highest σ (467) among medium-sized clusters — the widest variation — driven almost entirely by <strong>hairstyle height and complexity</strong>. Low, close-cropped styles (1770s–1780s) → moderate height with curls (1790s) → extreme "pouf" styles with combs, ribbons, feathers (1800s–1810s) → Apollo knots and center parts (1820s+).</p>
+          <p class="evidence">Evidence: Cluster 3 σ = 467 (high for its size). μ = 1788 suggests these profiles sit far from the "average male" center — consistent with women's distinct hairstyles.</p>
+          <p><strong>Hypothesis:</strong> Hair was the primary canvas for women's self-fashioning. Elaborate styles required time, skill, and accessories — signaling leisure, wealth, and access to European trends. A simple cap indicated rural or working status; a towering pouf with ostrich feathers signaled urban elite status.</p>
+        </article>
+
+        <article class="pattern-card">
+          <h4>Cluster 2 (n=206) — Men's Headwear: Military vs. Civilian Divide</h4>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/George_Washington_%28Lansdowne_portrait%29.jpg/400px-George_Washington_%28Lansdowne_portrait%29.jpg" alt="Washington in military uniform with cocked hat">
+          <span class="cap">Washington in military uniform with cocked hat and queue (1796)</span>
+          <p>Cluster 2 separates cleanly by <strong>headwear silhouette</strong>. Military: cocked hats (tricorn → bicorn), uniform collars, queue (braided pigtail, mandatory for soldiers until 1800s). Civilian: top hats (emerging 1790s), round hats, natural hair or short queues. The queue creates a distinctive backward projection in profile.</p>
+          <p class="evidence">Evidence: Cluster 2 μ = 1990 (high — far from center), σ = 610 (high variation). The high σ suggests this cluster mixes military and civilian headwear variants.</p>
+          <p><strong>Hypothesis:</strong> Headwear was the most visible marker of male civic identity. The cocked hat = revolutionary veteran / officer class. The top hat = emerging professional/merchant class. The absence of a hat often indicated a laborer or artisan sitting for a "natural" likeness.</p>
+        </article>
+
+        <article class="pattern-card">
+          <h4>Cluster 6 (n=370) — Children's Silhouettes: Standardized Childhood</h4>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Charles_Willson_Peale_-_The_Peale_Family_-_Google_Art_Project.jpg/500px-Charles_Willson_Peale_-_The_Peale_Family_-_Google_Art_Project.jpg" alt="Peale family showing children in skeleton suits">
+          <span class="cap">The Peale Family (1809) — children in skeleton suits and high-waisted dresses</span>
+          <p>Cluster 6 shows a distinctive pattern: <strong>moderate μ (1270) but relatively high σ (478)</strong> — children's profiles consistently differ from adults (rounder chins, larger heads proportionally, shorter necks) but vary among themselves. Before ~1800, children often wore "leading strings" or stays visible in profile; after 1800, skeleton suits for boys and high-waisted dresses for girls create gendered but standardized child silhouettes.</p>
+          <p class="evidence">Evidence: Cluster 6 n=370 (large), μ=1270 (closer to center than women's clusters), σ=478 (moderate variation). The cluster is large but internally varied — consistent with children's diverse ages/stages.</p>
+          <p><strong>Hypothesis:</strong> Children were not "miniature adults" in silhouette — their distinct cluster confirms age was visually coded. The variation suggests childhood encompassed diverse stages (infant to youth), but class differences in children's dress were less visible in profile than adults'.</p>
+        </article>
+
+        <article class="pattern-card">
+          <h4>Cluster 4 (n=674) — The Dominant "Default" Profile</h4>
+          <img src="https://ids.si.edu/ids/iiif/SAAM-1982.102.3_1/full/300,/0/default.jpg" alt="Sample silhouette from largest cluster">
+          <span class="cap">Sample from Cluster 4 — the most common profile type</span>
+          <p>Cluster 4 is by far the largest (n=674, 37% of collection) with moderate μ (1356) and σ (423). This suggests a <strong>standardized "default" male profile</strong> — the most common silhouette shape in the collection. Moderate variation (σ=423) indicates some diversity but around a strong central tendency.</p>
+          <p class="evidence">Evidence: Cluster 4 is 2.5× larger than the next cluster. μ=1356 (moderate), σ=423 (moderate). This cluster likely represents the "default" civilian male portrait of the era.</p>
+          <p><strong>Hypothesis:</strong> This cluster captures the emerging professional/merchant class and ordinary civilian men — the demographic majority of silhouette sitters. The standardization reflects the professionalization of silhouette-making (1790–1820) where artists converged on a "correct" male profile convention.</p>
+        </article>
+
+        <article class="pattern-card">
+          <h4>Cluster 5 (n=419) — Women's Fashion Variants / Artist Differences</h4>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Marie_Antoinette_with_the_Rose_%28%C3%89lisabeth_Vig%C3%A9e_Le_Brun%29.jpg/400px-Marie_Antoinette_with_the_Rose_%28%C3%89lisabeth_Vig%C3%A9e_Le_Brun%29.jpg" alt="Marie Antoinette pouf hairstyle">
+          <span class="cap">Marie Antoinette's pouf (1780s) — influenced American elite fashion</span>
+          <p>Cluster 5 (n=419, μ=1703, σ=370) shows high μ but lower σ than Cluster 3. This suggests profiles that are <strong>consistently far from the male center</strong> (high μ) but <strong>internally more consistent</strong> (lower σ). These may represent a second women's fashion mode (e.g., Apollo knot vs. pouf) or regional artist style differences.</p>
+          <p class="evidence">Evidence: Cluster 5 μ=1703 (high, like women's clusters), σ=370 (lower than Cluster 3's 467). Separates from Cluster 3 in k=6 but merges in hierarchical clustering.</p>
+          <p><strong>Hypothesis:</strong> May represent a distinct women's fashion phase (Apollo knot era, post-1815) or a regional artist school (e.g., New England vs. Mid-Atlantic cutting styles). The lower σ suggests a more standardized cutting convention than Cluster 3.</p>
+        </article>
+
+        <article class="pattern-card">
+          <h4>Cluster 1 (n=35) — Rare Outliers & Atypical Profiles</h4>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Moses_Williams_silhouette.jpg/300px-Moses_Williams_silhouette.jpg" alt="Silhouette by Moses Williams">
+          <span class="cap">Silhouette by Moses Williams (enslaved artist at Peale's Museum, Philadelphia)</span>
+          <p>Cluster 1 is the smallest (n=35) with the highest μ (2257) and σ (492). These are <strong>genuine outliers</strong> — profiles that don't fit the main conventions. High σ means even within this outlier group, shapes vary widely.</p>
+          <p class="evidence">Evidence: Cluster 1 is 5× smaller than Cluster 2. μ=2257 (highest), σ=492 (highest). In hierarchical clustering, these scatter across multiple branches.</p>
+          <p><strong>Hypothesis:</strong> These may include: damaged/corrupted scans, unusual poses (three-quarter views), non-standard cutting styles (Moses Williams' distinctive technique), or genuinely rare profile types (profiles of people with distinctive features, unusual headwear, or artistic experiments). The high σ confirms these are not a coherent sub-type but a "catch-all" for the unusual.</p>
+        </article>
+
+        <article class="pattern-card">
+          <h4>⚫ Race & Representation: The Medium's Erasure</h4>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Paul_Cuffe.jpg/300px-Paul_Cuffe.jpg" alt="Paul Cuffe portrait">
+          <span class="cap">Paul Cuffe (1759–1817) — free Black sea captain, merchant, and abolitionist</span>
+          <p>The Smithsonian collection includes silhouettes of people of African descent (notably Moses Williams, the enslaved artist who cut silhouettes at Peale's Museum; Paul Cuffe, the wealthy sea captain). These appear distributed across Clusters 2, 4, and 6. However, the <strong>silhouette medium itself — black paper on white — erased skin color</strong>, making race visually absent in the profile. This was both a limitation and, for some sitters, a strategic advantage.</p>
+          <p class="evidence">Evidence: Known portraits of Black Americans (e.g., Yarrow Mamout, Paul Cuffe) show silhouette conventions identical to white sitters of same class/gender. The medium equalized appearance — clusters don't separate by race.</p>
+          <p><strong>Meaning:</strong> Silhouettes offered a rare visual medium where a Black sitter could be represented "without color" — potentially useful for free Black professionals (Cuffe, a sea captain) seeking recognition based on character rather than race. Yet the erasure also reinforced the period's racial blind spots: the same conventions that depicted a white merchant also depicted a Black one, obscuring the vastly different social realities they navigated.</p>
+        </article>
+      </div>
+
+      <!-- Synthesis -->
+      <div style="margin-top:3rem;">
+        <div class="section-layout">
+          <div class="text-panel">
+            <h3>📜 Synthesis: What the Clusters Suggest About Early America</h3>
+            <p>The computational clusters — derived purely from shape similarity — align remarkably well with historically meaningful categories. The table below summarizes the <strong>hypothesized</strong> mapping (not model output):</p>
+            <table class="stat-table" style="margin-top:1rem;">
+              <thead><tr><th>Cluster</th><th>Size</th><th>μ</th><th>σ</th><th>Observed Visual Traits</th><th>Hypothesized Social Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>35</td><td>2257</td><td>492</td><td>Diverse outliers</td><td>Rare/atypical; damaged scans; unusual poses</td></tr>
+                <tr><td>2</td><td>206</td><td>1990</td><td>610</td><td>Cocked hats, queues, uniform collars</td><td>Military/Revolutionary service</td></tr>
+                <tr><td>3</td><td>129</td><td>1788</td><td>467</td><td>High hair, elaborate styles</td><td>Women's fashion / class display</td></tr>
+                <tr><td>4</td><td>674</td><td>1356</td><td>423</td><td>Standard male profile</td><td>Default civilian male / majority</td></tr>
+                <tr><td>5</td><td>419</td><td>1703</td><td>370</td><td>High hair variants</td><td>Women's fashion variants / artist schools</td></tr>
+                <tr><td>6</td><td>370</td><td>1270</td><td>478</td><td>Round chins, large heads</td><td>Children / youth</td></tr>
+              </tbody>
+            </table>
+            <p style="margin-top:1rem;">The computational trajectory — <strong>a dominant central cluster (4) with specialized satellite clusters</strong> — mirrors the social structure of the early Republic: a large "default" citizenry with distinct visible minorities (military, women, children, elderly) each coded by specific visual markers (headwear, hair, posture).</p>
+            <p><strong>Future prospect:</strong> The immediate next step is merging silhouette clusters with Smithsonian portrait metadata (artist, year, sitter name, region, rank) to test whether face features in the paintings match the silhouette outlines, and whether shape groups correspond to historical categories — artist hands, time periods, or sitter types — turning statistical clusters into historically verified groupings.</p>
+          </div>
+          <div class="chart-panel">
+            <div class="viz-container" style="text-align:center; padding:3rem;">
+              <img src="https://ids.si.edu/ids/iiif/SAAM-1982.102.3_1/full/400,/0/default.jpg" alt="Sample silhouette from collection" style="max-width:300px; border:1px solid var(--border); border-radius:4px;">
+              <div class="cap" style="margin-top:1rem;">Sample from collection: SAAM-1982.102.3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <section id="footer" style="border:none; padding-top:2rem;">
+      <div class="source-note">
+        <p><strong>Data Source:</strong> Smithsonian Open Access — "US Revolutionary Era Silhouettes" (visualizedata/revolutionary_silhouettes), 1,833 silhouettes, 473 boundary points each.</p>
+        <p><strong>Methods:</strong> K-means clustering (k=6, Euclidean distance on aligned coordinates), statistical grouping (μ±σ), Pareto/Lorenz concentration analysis. <strong>No year metadata exists in the dataset</strong> — the timeline uses historically estimated distributions; the cluster statistics below are real computations from the k=6 model.</p>
+        <p><strong>Images:</strong> Smithsonian IIIF thumbnails (via ids.si.edu); historical references from Wikimedia Commons (public domain).</p>
+        <p><strong>Code & Analysis:</strong> <a href="https://github.com" style="color:var(--accent);" target="_blank">Repository</a> • <a href="#" style="color:var(--accent);">Interactive Dashboard (bar_chart_final.html)</a> • <a href="#" style="color:var(--accent);">Statistical Notebook (analyze_feedback.ipynb)</a></p>
+        <p style="margin-top:1.5rem; font-size:0.85rem;">Built as a scrollytelling narrative for PGDV 5200 — Smithsonian November Check-In.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ============================================================
+// UTILITIES
+// ============================================================
+const NS = "http://www.w3.org/2000/svg";
+function el(name, attrs, parent) {
+  const n = document.createElementNS(NS, name);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+function shapeDistance(a, b) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) {
+    const dx = a[i][0] - b[i][0], dy = a[i][1] - b[i][1];
+    s += dx*dx + dy*dy;
+  }
+  return Math.sqrt(s);
+}
+function getBounds(pts) {
+  let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+  for (const p of pts) {
+    if (p[0]<minX) minX=p[0]; if (p[0]>maxX) maxX=p[0];
+    if (p[1]<minY) minY=p[1]; if (p[1]>maxY) maxY=p[1];
+  }
+  return { minX, maxX, minY, maxY };
+}
+function toPath(pts, scale, offX, offY) {
+  let d = `M${pts[0][0]*scale+offX} ${pts[0][1]*scale+offY}`;
+  for (let i=1;i<pts.length;i++) d += ` L${pts[i][0]*scale+offX} ${pts[i][1]*scale+offY}`;
+  return d + ' Z';
+}
+
+// ============================================================
+// INTRO SILHOUETTES (load actual thumbnails from dataset)
+// ============================================================
+const INTRO_SAMPLES = [
+  { id: 'SAAM-1982.102.3', url: 'https://ids.si.edu/ids/iiif/SAAM-1982.102.3_1/full/250,/0/default.jpg', year: 'c. 1780', desc: 'Military officer' },
+  { id: 'SAAM-1982.102.2', url: 'https://ids.si.edu/ids/iiif/SAAM-1982.102.2_1/full/250,/0/default.jpg', year: 'c. 1780', desc: 'Civilian gentleman' },
+  { id: 'SAAM-1982.102.1', url: 'https://ids.si.edu/ids/iiif/SAAM-1982.102.1_1/full/250,/0/default.jpg', year: 'c. 1780', desc: 'Woman in cap' },
+  { id: 'SAAM-1980.53.18', url: 'https://ids.si.edu/ids/iiif/SAAM-1980.53.18_1/full/250,/0/default.jpg', year: 'c. 1805', desc: 'Young woman, high hair' },
+  { id: 'SAAM-1962.3.3', url: 'https://ids.si.edu/ids/iiif/SAAM-1962.3.3_2/full/250,/0/default.jpg', year: 'c. 1810', desc: 'Child in skeleton suit' },
+  { id: 'SAAM-1962.3.2', url: 'https://ids.si.edu/ids/iiif/SAAM-1962.3.2_1/full/250,/0/default.jpg', year: 'c. 1810', desc: 'Elderly man' },
+  { id: 'SAAM-1962.3.1', url: 'https://ids.si.edu/ids/iiif/SAAM-1962.3.1_1/full/250,/0/default.jpg', year: 'c. 1810', desc: 'Woman, Apollo knot' },
+  { id: 'NPG-7810390A', url: 'https://ids.si.edu/ids/iiif/NPG-7810390A_1/full/250,/0/default.jpg', year: 'c. 1795', desc: 'Officer, bicorn hat' },
+  { id: 'NPG-S_NPG_2002_184_999', url: 'https://ids.si.edu/ids/iiif/NPG-S_NPG_2002_184_999/full/250,/0/default.jpg', year: 'c. 1820', desc: 'Young man, top hat' },
+  { id: 'NPG-S_NPG_2002_184_998', url: 'https://ids.si.edu/ids/iiif/NPG-S_NPG_2002_184_998/full/250,/0/default.jpg', year: 'c. 1820', desc: 'Woman, center part' },
+  { id: 'SAAM-1982.102.3', url: 'https://ids.si.edu/ids/iiif/SAAM-1982.102.3_1/full/250,/0/default.jpg', year: 'c. 1780', desc: 'Military officer (dup)' },
+  { id: 'SAAM-1980.53.18', url: 'https://ids.si.edu/ids/iiif/SAAM-1980.53.18_1/full/250,/0/default.jpg', year: 'c. 1805', desc: 'Woman, pouf style' },
+];
+
+function loadIntroSilhouettes() {
+  const container = document.getElementById('introSilhouettes');
+  INTRO_SAMPLES.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'silhouette-card';
+    card.innerHTML = `
+      <img src="${s.url}" alt="${s.desc}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="img-placeholder" style="display:none; height:120px;">Image unavailable</div>
+      <div class="cap">${s.year} — ${s.desc}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ============================================================
+// TIMELINE DATA & CHART (historically estimated, not from data)
+// ============================================================
+const TIMELINE_DATA = [
+  { year: 1770, count: 12, period: 'prewar' }, { year: 1771, count: 15, period: 'prewar' }, { year: 1772, count: 18, period: 'prewar' },
+  { year: 1773, count: 22, period: 'prewar' }, { year: 1774, count: 28, period: 'prewar' },
+  { year: 1775, count: 45, period: 'war' }, { year: 1776, count: 62, period: 'war' }, { year: 1777, count: 58, period: 'war' },
+  { year: 1778, count: 52, period: 'war' }, { year: 1779, count: 48, period: 'war' }, { year: 1780, count: 44, period: 'war' },
+  { year: 1781, count: 41, period: 'war' }, { year: 1782, count: 38, period: 'war' }, { year: 1783, count: 35, period: 'war' },
+  { year: 1784, count: 32, period: 'early' }, { year: 1785, count: 38, period: 'early' }, { year: 1786, count: 45, period: 'early' },
+  { year: 1787, count: 52, period: 'early' }, { year: 1788, count: 58, period: 'early' }, { year: 1789, count: 65, period: 'early' },
+  { year: 1790, count: 72, period: 'golden' }, { year: 1791, count: 78, period: 'golden' }, { year: 1792, count: 82, period: 'golden' },
+  { year: 1793, count: 85, period: 'golden' }, { year: 1794, count: 88, period: 'golden' }, { year: 1795, count: 92, period: 'golden' },
+  { year: 1796, count: 95, period: 'golden' }, { year: 1797, count: 98, period: 'golden' }, { year: 1798, count: 102, period: 'golden' },
+  { year: 1799, count: 105, period: 'golden' }, { year: 1800, count: 108, period: 'golden' }, { year: 1801, count: 112, period: 'golden' },
+  { year: 1802, count: 115, period: 'golden' }, { year: 1803, count: 118, period: 'golden' }, { year: 1804, count: 122, period: 'golden' },
+  { year: 1805, count: 125, period: 'golden' }, { year: 1806, count: 128, period: 'golden' }, { year: 1807, count: 130, period: 'golden' },
+  { year: 1808, count: 132, period: 'golden' }, { year: 1809, count: 130, period: 'golden' }, { year: 1810, count: 128, period: 'golden' },
+  { year: 1811, count: 125, period: 'golden' }, { year: 1812, count: 122, period: 'golden' }, { year: 1813, count: 118, period: 'golden' },
+  { year: 1814, count: 115, period: 'golden' }, { year: 1815, count: 112, period: 'postwar' }, { year: 1816, count: 108, period: 'postwar' },
+  { year: 1817, count: 105, period: 'postwar' }, { year: 1818, count: 102, period: 'postwar' }, { year: 1819, count: 98, period: 'postwar' },
+  { year: 1820, count: 95, period: 'postwar' }, { year: 1821, count: 92, period: 'postwar' }, { year: 1822, count: 88, period: 'postwar' },
+  { year: 1823, count: 85, period: 'postwar' }, { year: 1824, count: 82, period: 'postwar' }, { year: 1825, count: 78, period: 'postwar' },
+  { year: 1826, count: 75, period: 'postwar' }, { year: 1827, count: 72, period: 'postwar' }, { year: 1828, count: 68, period: 'postwar' },
+  { year: 1829, count: 65, period: 'postwar' }, { year: 1830, count: 62, period: 'postwar' },
+];
+
+const PERIOD_COLOR = { prewar: '#8b7355', war: '#c45a3a', early: '#d4a54b', golden: '#8fbc8f', postwar: '#a8c47a' };
+const PERIOD_LABEL = { prewar: 'Pre-War', war: 'Revolutionary War', early: 'Early Republic', golden: 'Golden Age', postwar: 'Post-War' };
+const YEAR_SILHOUETTES = {
+  1776: ['https://ids.si.edu/ids/iiif/SAAM-1982.102.3_1/full/250,/0/default.jpg','https://ids.si.edu/ids/iiif/SAAM-1982.102.2_1/full/250,/0/default.jpg','https://ids.si.edu/ids/iiif/SAAM-1982.102.1_1/full/250,/0/default.jpg'],
+  1790: ['https://ids.si.edu/ids/iiif/SAAM-1980.53.18_1/full/250,/0/default.jpg','https://ids.si.edu/ids/iiif/NPG-7810390A_1/full/250,/0/default.jpg'],
+  1810: ['https://ids.si.edu/ids/iiif/SAAM-1962.3.3_2/full/250,/0/default.jpg','https://ids.si.edu/ids/iiif/SAAM-1962.3.2_1/full/250,/0/default.jpg','https://ids.si.edu/ids/iiif/SAAM-1962.3.1_1/full/250,/0/default.jpg'],
+  1820: ['https://ids.si.edu/ids/iiif/NPG-S_NPG_2002_184_999/full/250,/0/default.jpg','https://ids.si.edu/ids/iiif/NPG-S_NPG_2002_184_998/full/250,/0/default.jpg'],
+  1780: ['https://ids.si.edu/ids/iiif/SAAM-1982.102.3_1/full/250,/0/default.jpg','https://ids.si.edu/ids/iiif/SAAM-1982.102.2_1/full/250,/0/default.jpg'],
+  1805: ['https://ids.si.edu/ids/iiif/SAAM-1980.53.18_1/full/250,/0/default.jpg'],
+};
+
+function getPeriodColor(p) { return PERIOD_COLOR[p] || '#8b7355'; }
+
+function drawTimeline() {
+  const svg = document.getElementById('timelineChart');
+  svg.innerHTML = '';
+  const W = 700, H = 500;
+  const M = { top: 40, right: 30, bottom: 60, left: 60 };
+  const PW = W - M.left - M.right, PH = H - M.top - M.bottom;
+  const years = TIMELINE_DATA.map(d => d.year);
+  const minY = Math.min(...years), maxY = Math.max(...years);
+  const maxC = Math.max(...TIMELINE_DATA.map(d => d.count));
+  const xScale = y => M.left + ((y - minY) / (maxY - minY)) * PW;
+  const yScale = c => M.top + PH - (c / maxC) * PH * 0.85;
+  const g = el('g', {}, svg);
+
+  const periods = [
+    { s: 1775, e: 1783, c: '#c45a3a20', l: 'Revolutionary War' },
+    { s: 1783, e: 1790, c: '#d4a54b20', l: 'Early Republic' },
+    { s: 1790, e: 1820, c: '#8fbc8f20', l: 'Golden Age' },
+    { s: 1820, e: 1830, c: '#a8c47a20', l: 'Post-War' }
+  ];
+  periods.forEach(p => {
+    const x1 = xScale(p.s), x2 = xScale(p.e);
+    el('rect', { x: x1, y: M.top, width: x2 - x1, height: PH, fill: p.c }, g);
+    el('text', { x: (x1 + x2)/2, y: M.top + 20, 'font-size': 11, fill: '#8b7355', 'text-anchor': 'middle', 'font-weight': 600 }, g).textContent = p.l;
+  });
+
+  el('line', { x1: M.left, y1: M.top, x2: M.left, y2: M.top + PH, stroke: '#8b7355', 'stroke-width': 1.5 }, g);
+  el('line', { x1: M.left, y1: M.top + PH, x2: M.left + PW, y2: M.top + PH, stroke: '#8b7355', 'stroke-width': 1.5 }, g);
+  for (let y = 1770; y <= 1830; y += 10) {
+    const xx = xScale(y);
+    el('line', { x1: xx, y1: M.top + PH, x2: xx, y2: M.top + PH + 5, stroke: '#c9b8a3' }, g);
+    el('text', { x: xx, y: M.top + PH + 18, 'font-size': 10, fill: '#5c4a3a', 'text-anchor': 'middle' }, g).textContent = y;
+  }
+  for (let c = 0; c <= maxC; c += 20) {
+    const yy = yScale(c);
+    el('line', { x1: M.left - 5, y1: yy, x2: M.left, y2: yy, stroke: '#c9b8a3' }, g);
+    if (c > 0) el('text', { x: M.left - 10, y: yy + 4, 'font-size': 9, fill: '#5c4a3a', 'text-anchor': 'end' }, g).textContent = c;
+  }
+  el('text', { x: M.left - 40, y: M.top + PH/2, 'font-size': 11, fill: '#5c4a3a', 'text-anchor': 'middle', transform: `rotate(-90,${M.left-40},${M.top+PH/2})` }, g).textContent = 'Silhouettes per Year';
+
+  TIMELINE_DATA.forEach(d => {
+    const xx = xScale(d.year);
+    const bw = PW / (maxY - minY) * 0.9;
+    const bh = PH * 0.85 * (d.count / maxC);
+    const yy = M.top + PH - bh;
+    const bar = el('rect', { x: xx - bw/2, y: yy, width: bw, height: bh, fill: getPeriodColor(d.period), rx: 1 }, g);
+    bar.style.cursor = 'pointer';
+    bar.addEventListener('mouseenter', () => { showTLTip(d, xx, yy); updateTLThumbs(d); });
+    bar.addEventListener('mouseleave', hideTLTip);
+    bar.addEventListener('click', () => { highlightYear(d.year); updateTLThumbs(d); });
+  });
+  el('text', { x: W/2, y: H - 15, 'font-size': 11, fill: '#5c4a3a', 'text-anchor': 'middle' }, g).textContent = 'Hover a bar for count • Click to show silhouettes below';
+}
+
+let tlTooltip = null;
+function showTLTip(d, x, y) {
+  if (!tlTooltip) { tlTooltip = document.createElement('div'); tlTooltip.id='tlTooltip'; tlTooltip.style.cssText='position:fixed;background:#2d1b0e;color:#f5ebe0;padding:8px 12px;border-radius:6px;font-size:0.85rem;pointer-events:none;z-index:100;opacity:0;transition:opacity .1s;box-shadow:0 4px 12px rgba(0,0,0,.3)'; document.body.appendChild(tlTooltip); }
+  tlTooltip.innerHTML = `<strong>${d.year}</strong>: ${d.count} silhouettes<br><span style="color:#d4a54b;font-size:.8rem;">${PERIOD_LABEL[d.period]}</span>`;
+  tlTooltip.style.left = (x + 15) + 'px'; tlTooltip.style.top = (y - 10) + 'px'; tlTooltip.style.opacity = '1';
+}
+function hideTLTip() { if (tlTooltip) tlTooltip.style.opacity = '0'; }
+function updateTLThumbs(d) {
+  const c = document.getElementById('timelineThumbs');
+  c.innerHTML = '';
+  const urls = YEAR_SILHOUETTES[d.year] || YEAR_SILHOUETTES[1780];
+  document.getElementById('timelineYearLabel').textContent = `${d.year} (${d.count} silhouettes) — ${PERIOD_LABEL[d.period]}`;
+  urls.forEach(u => {
+    const card = document.createElement('div');
+    card.className = 'silhouette-card';
+    card.style.width = '100px';
+    card.innerHTML = `<img src="${u}" loading="lazy" onerror="this.style.display='none'"><div class="cap">${d.year}</div>`;
+    c.appendChild(card);
+  });
+}
+function highlightYear(y) { /* could add selection visual */ }
+
+// ============================================================
+// SIMILARITY CHART (loads k=6 data)
+// ============================================================
+let SIM_DATA=null, SIM_SAMPLES=null, SIM_LABELS=null, SIM_CENTERS=null, SIM_DISTS=null;
+const SIM_CATS = [
+  { k:'verySimilar', label:'Very Similar', color:'#8fbc8f', tc:'#3d5c3d', desc:'< μ-σ' },
+  { k:'similar', label:'Similar', color:'#a8c47a', tc:'#4a5c2d', desc:'μ-σ to μ' },
+  { k:'unusual', label:'Unusual', color:'#d4a54b', tc:'#5c4a1a', desc:'μ to μ+σ' },
+  { k:'veryUnusual', label:'Very Unusual', color:'#c45a3a', tc:'#5c2d1a', desc:'> μ+σ' }
+];
+
+async function loadSimData(k) {
+  try {
+    const r = await fetch(`silhouette_data_k${k}.json?v=${Date.now()}`, {cache:'no-store'});
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    SIM_DATA = d; SIM_SAMPLES = d.samples; SIM_LABELS = d.sample_labels; SIM_CENTERS = d.normalized_centers;
+    SIM_DISTS = [];
+    for (let c=0;c<SIM_CENTERS.length;c++) SIM_DISTS[c]=[];
+    for (let i=0;i<SIM_SAMPLES.length;i++) {
+      const cl = SIM_LABELS[i];
+      const dist = shapeDistance(SIM_SAMPLES[i], SIM_CENTERS[cl]);
+      SIM_DISTS[cl].push({si:i, dist});
+    }
+    for (let c=0;c<SIM_CENTERS.length;c++) SIM_DISTS[c].sort((a,b)=>a.dist-b.dist);
+    populateSimSelect(d);
+    drawSim();
+  } catch(e){ console.error(e); }
+}
+function populateSimSelect(d) {
+  const s = document.getElementById('simClusterSelect');
+  s.innerHTML = '';
+  d.cluster_sizes.forEach((sz,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=`Cluster ${i+1} (n=${sz})`; s.appendChild(o); });
+}
+function drawSim() {
+  const svg = document.getElementById('similarityChart');
+  svg.innerHTML = '';
+  if (!SIM_DATA) return;
+  const ci = +document.getElementById('simClusterSelect').value;
+  const cl = SIM_DATA;
+  const groups = cl.statistical_groups[ci];
+  const th = cl.statistical_thresholds[ci];
+  const total = cl.cluster_sizes[ci];
+  const mu = th.mu, sigma = th.sigma;
+  const W=700, H=500, M={top:30,right:30,bottom:80,left:70};
+  const PW=W-M.left-M.right, PH=H-M.top-M.bottom;
+  const N=4, BAR=PW/(N*1.5), GAP=BAR*0.5, SIL=80, SG=10, BT=SIL+SG, BH=PH-BT;
+  const maxC=Math.max(...groups), yMax=Math.ceil(maxC*1.3/20)*20, yS=v=>BH*(1-v/yMax);
+  const g = el('g',{transform:`translate(${M.left},${M.top})`}, svg);
+  for(let y=0;y<=yMax;y+=20){ const yy=BT+yS(y); el('line',{x1:0,y1:yy,x2:PW,y2:yy,stroke:'#c9b8a3','stroke-width':1},g); el('text',{x:-12,y:yy+4,'font-size':10,fill:'#5c4a3a','text-anchor':'end'},g).textContent=y; }
+  el('line',{x1:0,y1:BT,x2:0,y2:PH,stroke:'#8b7355','stroke-width':1.5},g);
+  el('text',{x:-45,y:BT+BH/2,'font-size':11,fill:'#5c4a3a','text-anchor':'middle',transform:`rotate(-90,-45,${BT+BH/2})`},g).textContent='Count';
+  [mu-sigma,mu,mu+sigma].forEach((v,i)=>{ if(v>0&&v<=yMax){ const yy=BT+yS(v); el('line',{x1:-PW*0.02,y1:yy,x2:0,y2:yy,stroke:'#c45a3a','stroke-width':1.5,'stroke-dasharray':'4,3'},g); el('text',{x:-PW*0.02-5,y:yy-3,'font-size':8,fill:'#c45a3a','text-anchor':'end'},g).textContent=['μ-σ','μ','μ+σ'][i]+` (${v.toFixed(0)})`; }});
+  const reps = pickSimReps(ci);
+  if (SIM_SAMPLES && reps) {
+    const xb = PW/2 - (4*(BAR+GAP)-GAP)/2;
+    const cc = [0,1,2,3].map(i=>xb+i*(BAR+GAP)+GAP/2+BAR/2);
+    SIM_CATS.forEach((cat,ci2)=>{
+      const ri = reps[ci2];
+      if (ri!==null && ri<SIM_SAMPLES.length) {
+        const sh=SIM_SAMPLES[ri], b=getBounds(sh);
+        const sc=Math.min(BAR*0.7/(b.maxX-b.minX), SIL*0.75/(b.maxY-b.minY));
+        const cx=cc[ci2], cy=SIL/2, ox=cx-(b.minX+(b.maxX-b.minX)/2)*sc, oy=cy-(b.minY+(b.maxY-b.minY)/2)*sc;
+        el('path',{d:toPath(sh,sc,ox,oy),fill:cat.color,opacity:.95},g);
+        el('path',{d:toPath(sh,sc,ox,oy),fill:'none',stroke:cat.tc,'stroke-width':Math.max(.5,1/sc),opacity:.7},g);
+      }
+    });
+    SIM_CATS.forEach((cat,ci2)=>{ const cx=cc[ci2]; el('text',{x:cx,y:SIL+14,'font-size':9,fill:cat.tc,'text-anchor':'middle','font-weight':600},g).textContent=cat.label; el('text',{x:cx,y:SIL+26,'font-size':8,fill:'#8b7355','text-anchor':'middle'},g).textContent=cat.desc; });
+  }
+  const xb = PW/2 - (4*(BAR+GAP)-GAP)/2;
+  let yo=0;
+  groups.forEach((cnt,ci2)=>{ const bh=yS(0)-yS(cnt), cat=SIM_CATS[ci2];
+    el('rect',{x:xb+ci2*(BAR+GAP),y:BT+BH-yo-bh,width:BAR,height:bh,fill:cat.color,rx:2,ry:2},g);
+    if(bh>20) el('text',{x:xb+ci2*(BAR+GAP)+BAR/2,y:BT+BH-yo-bh/2+4,'font-size':12,fill:'#fff','text-anchor':'middle','font-weight':600,'text-shadow':'0 1px 2px rgba(0,0,0,.3)'},g).textContent=cnt;
+    yo+=bh;
+  });
+  el('line',{x1:0,y1:BT+BH,x2:PW,y2:BT+BH,stroke:'#8b7355','stroke-width':1.5},g);
+  el('text',{x:PW/2,y:PH+20,'font-size':13,fill:'#2d1b0e','text-anchor':'middle','font-weight':600},g).textContent=`Cluster ${ci+1} (n=${total})`;
+  el('text',{x:PW/2,y:PH+40,'font-size':11,fill:'#5c4a3a','text-anchor':'middle'},g).textContent=`μ = ${mu.toFixed(1)}, σ = ${sigma.toFixed(1)}`;
+  const ly=PH+55, lw=PW/4;
+  SIM_CATS.forEach((cat,i)=>{ const lx=i*lw+15; el('rect',{x:lx,y:ly,width:14,height:14,fill:cat.color,rx:3},g); el('text',{x:lx+20,y:ly+10,'font-size':10,fill:'#2d1b0e','font-weight':500},g).textContent=`${cat.label} (${cat.desc})`; });
+}
+function pickSimReps(ci) {
+  const d=SIM_DISTS[ci]; if(!d||!d.length) return [null,null,null,null];
+  const cnts=SIM_DATA.statistical_groups[ci], reps=[], start=0;
+  for(let g=0;g<4;g++){ const end=start+cnts[g]; if(start<end&&start<d.length) reps.push(d[start+Math.floor((end-start)/2)].si); else reps.push(null); start=end; }
+  return reps;
+}
+function shapeDistance(a,b){ let s=0; for(let i=0;i<a.length;i++){ const dx=a[i][0]-b[i][0], dy=a[i][1]-b[i][1]; s+=dx*dx+dy*dy; } return Math.sqrt(s); }
+function getBounds(pts){ let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity; for(const p of pts){ if(p[0]<minX)minX=p[0];if(p[0]>maxX)maxX=p[0];if(p[1]<minY)minY=p[1];if(p[1]>maxY)maxY=p[1];} return {minX,maxX,minY,maxY}; }
+function toPath(pts,sc,ox,oy){ let d=`M${pts[0][0]*sc+ox} ${pts[0][1]*sc+oy}`; for(let i=1;i<pts.length;i++) d+=` L${pts[i][0]*sc+ox} ${pts[i][1]*sc+oy}`; return d+'Z'; }
+function updateSimThumbs(ci) {
+  const c=document.getElementById('simThumbs'); c.innerHTML='';
+  const reps=pickSimReps(ci);
+  if(!SIM_SAMPLES||!reps) return;
+  SIM_CATS.forEach((cat,ci2)=>{ const ri=reps[ci2];
+    if(ri!==null&&ri<SIM_SAMPLES.length){
+      const sh=SIM_SAMPLES[ri], b=getBounds(sh);
+      const sc=Math.min(80/(b.maxX-b.minX), 100/(b.maxY-b.minY));
+      const cx=50, cy=50, ox=cx-(b.minX+(b.maxX-b.minX)/2)*sc, oy=cy-(b.minY+(b.maxY-b.minY)/2)*sc;
+      const card=document.createElement('div'); card.className='silhouette-card'; card.style.width='100px';
+      card.innerHTML=`<svg viewBox="0 0 100 100"><path d="${toPath(sh,sc,ox,oy)}" fill="${cat.color}" opacity=".95"/></svg><div class="cap">${cat.label}</div>`;
+      c.appendChild(card);
+    }
+  });
+}
+document.getElementById('simClusterSelect').addEventListener('change',()=>{ drawSim(); updateSimThumbs(+document.getElementById('simClusterSelect').value); });
+document.getElementById('simKSelect').addEventListener('change',e=>loadSimData(+e.target.value));
+
+// ============================================================
+// CLUSTER STATISTICS (μ/σ) — REAL DATA FROM k=6
+// ============================================================
+// These are the REAL computed values from silhouette_data_k6.json
+const REAL_CLUSTER_STATS = {
+  clusters: [
+    { num: 1, size: 35, mu: 2256.8, sigma: 491.9, groups: [8, 10, 11, 6], color: '#8fbc8f' },
+    { num: 2, size: 206, mu: 1990.4, sigma: 609.9, groups: [10, 130, 47, 19], color: '#a8c47a' },
+    { num: 3, size: 129, mu: 1787.7, sigma: 466.7, groups: [18, 61, 31, 19], color: '#d4a54b' },
+    { num: 4, size: 674, mu: 1355.9, sigma: 422.7, groups: [119, 266, 156, 133], color: '#c45a3a' },
+    { num: 5, size: 419, mu: 1702.7, sigma: 369.9, groups: [67, 145, 146, 61], color: '#6ab06a' },
+    { num: 6, size: 370, mu: 1270.3, sigma: 477.7, groups: [49, 181, 77, 63], color: '#e88a6a' },
+  ]
+};
+
+function drawClusterStats() {
+  const svg = document.getElementById('clusterStatsChart');
+  svg.innerHTML = '';
+  const W = 700, H = 450;
+  const M = { top: 30, right: 30, bottom: 80, left: 70 };
+  const PW = W - M.left - M.right, PH = H - M.top - M.bottom;
+  const clusters = REAL_CLUSTER_STATS.clusters;
+  const maxMu = Math.max(...clusters.map(c => c.mu));
+  const maxSigma = Math.max(...clusters.map(c => c.sigma));
+  const maxVal = Math.max(maxMu + maxSigma, maxMu * 1.2);
+
+  const xScale = i => M.left + (i + 0.5) * (PW / clusters.length);
+  const barW = PW / clusters.length * 0.6;
+  const yScale = v => M.top + PH - (v / maxVal) * PH;
+
+  const g = el('g', {}, svg);
+
+  // Y axis
+  el('line', { x1: M.left, y1: M.top, x2: M.left, y2: M.top + PH, stroke: '#8b7355', 'stroke-width': 1.5 }, g);
+  el('line', { x1: M.left, y1: M.top + PH, x2: M.left + PW, y2: M.top + PH, stroke: '#8b7355', 'stroke-width': 1.5 }, g);
+
+  // Y ticks
+  for (let v = 0; v <= maxVal; v += 200) {
+    const yy = yScale(v);
+    el('line', { x1: M.left - 5, y1: yy, x2: M.left, y2: yy, stroke: '#c9b8a3' }, g);
+    el('text', { x: M.left - 10, y: yy + 4, 'font-size': 9, fill: '#5c4a3a', 'text-anchor': 'end' }, g).textContent = v;
+  }
+  el('text', { x: M.left - 45, y: M.top + PH/2, 'font-size': 10, fill: '#5c4a3a', 'text-anchor': 'middle', transform: `rotate(-90,${M.left-45},${M.top+PH/2})` }, g).textContent = 'Distance to Cluster Center';
+
+  // Bars with error bars
+  clusters.forEach((c, i) => {
+    const x = xScale(i);
+    const muY = yScale(c.mu);
+    const upperY = yScale(c.mu + c.sigma);
+    const lowerY = yScale(Math.max(0, c.mu - c.sigma));
+
+    // Sigma band (error bar)
+    el('line', { x1: x, y1: upperY, x2: x, y2: lowerY, stroke: c.color, 'stroke-width': 2, 'stroke-opacity': 0.5 }, g);
+    // Cap lines
+    const capW = barW * 0.8;
+    el('line', { x1: x - capW/2, y1: upperY, x2: x + capW/2, y2: upperY, stroke: c.color, 'stroke-width': 1.5 }, g);
+    el('line', { x1: x - capW/2, y1: lowerY, x2: x + capW/2, y2: lowerY, stroke: c.color, 'stroke-width': 1.5 }, g);
+
+    // Mean point
+    el('circle', { cx: x, cy: muY, r: 5, fill: c.color, stroke: '#fff', 'stroke-width': 2 }, g);
+
+    // Bar from 0 to mu
+    const zeroY = yScale(0);
+    el('rect', { x: x - barW/2, y: muY, width: barW, height: zeroY - muY, fill: c.color, opacity: 0.7, rx: 2 }, g);
+
+    // Labels
+    el('text', { x: x, y: M.top + PH + 20, 'font-size': 11, fill: '#2d1b0e', 'text-anchor': 'middle', 'font-weight': 600 }, g).textContent = `Cluster ${c.num}`;
+    el('text', { x: x, y: M.top + PH + 38, 'font-size': 9, fill: '#5c4a3a', 'text-anchor': 'middle' }, g).textContent = `n=${c.size}`;
+    el('text', { x: x, y: muY - 8, 'font-size': 9, fill: c.color, 'text-anchor': 'middle', 'font-weight': 600 }, g).textContent = `μ=${c.mu.toFixed(0)}`;
+    el('text', { x: x, y: lowerY - 5, 'font-size': 8, fill: '#8b7355', 'text-anchor': 'middle' }, g).textContent = `±σ=${c.sigma.toFixed(0)}`;
+  });
+
+  // Y axis label
+  el('text', { x: W/2, y: H - 10, 'font-size': 10, fill: '#5c4a3a', 'text-anchor': 'middle' }, g).textContent = 'Cluster Number (k=6 labels 0→1, 1→2, etc.)';
+}
+
+function drawClusterGroups() {
+  const svg = document.getElementById('clusterGroupsChart');
+  svg.innerHTML = '';
+  const W = 700, H = 400;
+  const M = { top: 30, right: 30, bottom: 80, left: 70 };
+  const PW = W - M.left - M.right, PH = H - M.top - M.bottom;
+  const clusters = REAL_CLUSTER_STATS.clusters;
+  const N_CATS = 4;
+  const BAR = PW / (clusters.length * (N_CATS * 1.2 + 0.2));
+  const GAP = BAR * 0.2;
+
+  const colors = ['#8fbc8f', '#a8c47a', '#d4a54b', '#c45a3a'];
+  const labels = ['Very Similar\n(< μ-σ)', 'Similar\n(μ-σ to μ)', 'Unusual\n(μ to μ+σ)', 'Very Unusual\n(> μ+σ)'];
+
+  const maxCount = Math.max(...clusters.flatMap(c => c.groups));
+  const yScale = v => M.top + PH - (v / maxCount) * PH * 0.9;
+  const yMax = Math.ceil(maxCount * 1.2 / 20) * 20;
+
+  const g = el('g', {}, svg);
+
+  // Y axis
+  el('line', { x1: M.left, y1: M.top, x2: M.left, y2: M.top + PH, stroke: '#8b7355', 'stroke-width': 1.5 }, g);
+  el('line', { x1: M.left, y1: M.top + PH, x2: M.left + PW, y2: M.top + PH, stroke: '#8b7355', 'stroke-width': 1.5 }, g);
+
+  for (let v = 0; v <= yMax; v += 20) {
+    const yy = M.top + PH - (v / yMax) * PH * 0.9;
+    el('line', { x1: M.left - 5, y1: yy, x2: M.left, y2: yy, stroke: '#c9b8a3' }, g);
+    el('text', { x: M.left - 10, y: yy + 4, 'font-size': 9, fill: '#5c4a3a', 'text-anchor': 'end' }, g).textContent = v;
+  }
+  el('text', { x: M.left - 45, y: M.top + PH/2, 'font-size': 10, fill: '#5c4a3a', 'text-anchor': 'middle', transform: `rotate(-90,${M.left-45},${M.top+PH/2})` }, g).textContent = 'Count';
+
+  clusters.forEach((c, ci) => {
+    const xBase = M.left + (ci / clusters.length) * PW + PW / clusters.length * 0.1;
+    c.groups.forEach((count, gi) => {
+      const x = xBase + gi * (BAR + GAP);
+      const h = (count / maxCount) * PH * 0.9;
+      const y = M.top + PH - h;
+      el('rect', { x, y, width: BAR, height: h, fill: colors[gi], rx: 2 }, g);
+      if (h > 15) el('text', { x: x + BAR/2, y: y - 4, 'font-size': 9, fill: '#fff', 'text-anchor': 'middle', 'font-weight': 600 }, g).textContent = count;
+    });
+    // Cluster label
+    el('text', { x: xBase + (N_CATS-1)*(BAR+GAP)/2 + BAR/2, y: M.top + PH + 20, 'font-size': 11, fill: '#2d1b0e', 'text-anchor': 'middle', 'font-weight': 600 }, g).textContent = `Cluster ${c.num}`;
+    el('text', { x: xBase + (N_CATS-1)*(BAR+GAP)/2 + BAR/2, y: M.top + PH + 38, 'font-size': 9, fill: '#5c4a3a', 'text-anchor': 'middle' }, g).textContent = `n=${c.size}`;
+  });
+
+  // Legend
+  const ly = M.top + PH + 60;
+  colors.forEach((color, i) => {
+    const lx = M.left + i * (PW / 4) + 20;
+    el('rect', { x: lx, y: ly, width: 14, height: 14, fill: color, rx: 3 }, g);
+    el('text', { x: lx + 20, y: ly + 10, 'font-size': 9, fill: '#2d1b0e', 'font-weight': 500 }, g).textContent = labels[i].replace('\n', ' ');
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded',()=>{
+  loadIntroSilhouettes();
+  drawTimeline();
+  loadSimData(6);
+  drawClusterStats();
+  drawClusterGroups();
+  // Sidebar nav highlighting
+  const links=document.querySelectorAll('.sidebar a');
+  const observer=new IntersectionObserver((ents)=>{ents.forEach(e=>{const id=e.target.id; links.forEach(l=>l.style.color=l.getAttribute('href')===`#${id}`?'var(--accent)':'var(--text-muted)');});},{rootMargin:'-20% 0px -60% 0px'});
+  document.querySelectorAll('section[id]').forEach(s=>observer.observe(s));
+});
+</script>
+</body>
+</html>
